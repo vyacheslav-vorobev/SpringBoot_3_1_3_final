@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>allUsers</title>
+</head>
+
+<body>
+<div class="container-fluid">
+    <div class="row">
+<!--        Верхняя строка-->
+        <div class="col-12">
+            <nav class="navbar bg-dark ">
+                <span class="text-light" th:text="|${user1.getLogin()} with roles: ${user1.getRoles()}|"></span>
+                <a type="submit" class="text-muted text-decoration-none" th:href="@{/logout}">Logout</a>
+            </nav>
+            <br/>
+        </div>
+<!--        боковое меню-->
+        <div class="col-2">
+            <nav class="nav nav-pills flex-column">
+                <a sec:authorize= "hasRole('ROLE_ADMIN')" class="nav-link active" data-toggle="tab" href="#pageAdmin" >Admin</a>
+                <a class="nav-link " data-toggle="tab" href="#pageUser">User</a>
+            </nav>
+        </div>
+        <div class="tab-content col-10" >
+<!--        Таблица всех юзеров-->
+            <div sec:authorize= "hasRole('ROLE_ADMIN')" class="tab-pane fade show active" id="pageAdmin" >
+                <div class="bg-light"  >
+                    <h1>Admin panel</h1>
+                    <ul class="nav nav-tabs" id ="tabs">
+                        <li class="nav-item" >
+                            <a class="nav-link active" data-toggle="tab" href="#user_table" id="navLinkTable">User table</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#new_user" id="navLinkNew">New User</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="user_table">
+                            <div class="card-header">
+                                <h4 class="card-title">All users</h4>
+                            </div>
+                            <div class="container">
+                                <div class="card-dody">
+                                    <table class="table ">
+                                        <thead>
+                                            <tr>
+                                                <th>Id</th>
+                                                <th>Login</th>
+                                                <th>First Name</th>
+                                                <th>Last Name</th>
+                                                <th>Role</th>
+                                                <th>Age</th>
+                                                <th>Growth</th>
+                                                <th>Edit</th>
+                                                <th>Delete</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id ="tbody">
+                                            <tr class="table-active" id = "actualUser">
+                                                <th scope="row" id = "actualUserId"></th>
+                                                <td id= "actualLogin"></td>
+                                                <td id = "actualFirstName"></td>
+                                                <td id = "actualLastName"></td>
+                                                <td id = "actualRoles"></td>
+                                                <td id = "actualAge"></td>
+                                                <td id = "actualGrowth"></td>
+                                                <td>
+                                                    <button type="button" class="btn btn-primary edit" content="" id = "actualEdit">
+                                                        Edit
+                                                    </button>
+                                                </td>
+                                                <td >
+                                                    <button type="button" class="btn btn-danger text-light del" data-toggle="modal"
+                                                            data-target="#modalDelete" content="" id = "actualDelete">
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr class="tab-content" th:each="user : ${users}" th:id="|del${user.getId()}|">
+                                                <th scope="row" th:id="|id${user.getId()}|"></th>
+                                                <td th:id="|login${user.getId()}|"></td>
+                                                <td th:id="|firstname${user.getId()}|"></td>
+                                                <td th:id="|lastname${user.getId()}|"></td>
+                                                <td th:id="|roles${user.getId()}|"></td>
+                                                <td th:id="|age${user.getId()}|"></td>
+                                                <td th:id="|growth${user.getId()}|"></td>
+                                                <td>
+                                                    <button type="button" class="btn btn-primary edit" th:content="${user.getId()}">
+                                                        Edit
+                                                    </button>
+                                                </td>
+                                                <td class="tdDel">
+                                                    <button type="button" class="btn btn-danger del" data-toggle="modal"
+                                                            data-target="#modalDelete" th:content="${user.getId()}">
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+<!--                        Создание юзера-->
+                        <div class="tab-pane fade active" id="new_user">
+                            <div class="card-header">
+                                <h4 class="card-title">Add new user</h4>
+                            </div>
+                            <div class="container">
+                                <div class="card-dody">
+                                    <div class="row justify-content-center align-items-center" style="text-align: center;">
+                                        <form  th:method="POST" th:object="${user}" action="">
+                                            <br/>
+                                            <label class="font-weight-bold" for="login">Login</label>
+                                            <input type="text" th:field="*{login}" class="form-control">
+
+                                            <label class="font-weight-bold" for="password">Password</label>
+                                            <input type="password" th:field="*{password}" class="form-control">
+
+                                            <label class="font-weight-bold" for="firstName">First Name</label>
+                                            <input type="text" th:field="*{firstName}" class="form-control">
+
+                                            <label class="font-weight-bold" for="lastName">Last Name</label>
+                                            <input type="text" th:field="*{lastName}" class="form-control">
+
+                                            <label class="font-weight-bold" for="age">Age</label>
+                                            <input type="number" th:field="*{age}" class="form-control">
+
+                                            <label class="font-weight-bold" for="growth">Growth</label>
+                                            <input type="number" th:field="*{growth}" class="form-control">
+
+                                            <h6 class="font-weight-bold">Role</h6>
+                                            <select size="2" name="role" class="btn-block">
+                                                <option selected value="USER">USER</option>
+                                                <option value="ADMIN">ADMIN</option>
+                                            </select>
+                                            <br/>
+                                            <button type="button" class="btn btn-success" id="newUser">Add new user</button>
+                                            <br/>
+                                            &nbsp
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--        Таблица Пользователя-->
+            <div class="tab-pane fade" id="pageUser">
+                <div lass="bg-light">
+                    <h1>User information-page</h1>
+                    <div class="card-header">
+                        <h4 class="card-title">About user</h4>
+                    </div>
+                    <div class="container">
+                        <div class="card-dody">
+                            <table class="table ">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Login</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Role</th>
+                                        <th>Age</th>
+                                        <th>Growth</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="table-active">
+                                        <th scope="row" id = "panelUserId"></th>
+                                        <td id= "panelLogin"></td>
+                                        <td id = "panelFirstName"></td>
+                                        <td id = "panelLastName"></td>
+                                        <td id = "panelRoles"></td>
+                                        <td id = "panelAge"></td>
+                                        <td id = "panelGrowth"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Edit -->
+<div class="modal" id="modalEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form th:method="POST" th:object="${user1}" action="" id="formEdit">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit user</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row justify-content-center align-items-center" style="text-align: center;">
+                        <div>
+                            <label class="font-weight-bold" for="login">Login</label>
+                            <input type="text" th:field="*{login}" class="form-control" id="login">
+                            <br/>
+                            <label class="font-weight-bold" for="password">Password</label>
+                            <input type="password" th:field="*{password}" class="form-control" id="password">
+                            <br/>
+                            <label class="font-weight-bold" for="firstName">First Name</label>
+                            <input type="text" th:field="*{firstName}" class="form-control" id="firstName">
+                            <br/>
+                            <label class="font-weight-bold" for="lastName">Last Name</label>
+                            <input type="text" th:field="*{lastName}" class="form-control" id="lastName">
+                            <br/>
+                            <label class="font-weight-bold" for="age">Age</label>
+                            <input type="number" th:field="*{age}" class="form-control" id="age">
+                            <br/>
+                            <label class="font-weight-bold" for="growth">Growth</label>
+                            <input type="number" th:field="*{growth}" class="form-control" id="growth">
+                            <br/>
+                            <h6 class="font-weight-bold">Role</h6>
+                            <select size="2" name="role" class="btn-block">
+                                <option selected value="USER">USER</option>
+                                <option value="ADMIN">ADMIN</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <input type="button" class="btn btn-primary" value="Edit" id = "goEdit" content="">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Delete -->
+<div class="modal" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form th:method="POST" th:object="${user1}" th:action="@{/admin/{id}(id = ${user1.getId()})}" id="formDelete">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete user</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <fieldset disabled>
+                    <div class="modal-body">
+                        <div class="row justify-content-center align-items-center" style="text-align: center;">
+                            <div>
+                                <label class="font-weight-bold" for="login">Login</label>
+                                <input type="text" th:field="*{login}" class="form-control" id="loginD">
+                                <br/>
+                                <label class="font-weight-bold" for="firstName">First Name</label>
+                                <input type="text" th:field="*{firstName}" class="form-control" id="firstNameD">
+                                <br/>
+                                <label class="font-weight-bold" for="lastName">Last Name</label>
+                                <input type="text" th:field="*{lastName}" class="form-control" id="lastNameD">
+                                <br/>
+                                <label class="font-weight-bold" for="age">Age</label>
+                                <input type="text" th:field="*{age}" class="form-control" id="ageD">
+                                <br/>
+                                <label class="font-weight-bold" for="growth">Growth</label>
+                                <input type="text" th:field="*{growth}" class="form-control" id="growthD">
+                                <br/>
+                                <h6 class="font-weight-bold">Role</h6>
+                                <select size="2" name="role" class="btn-block">
+                                    <option value="USER" id = "roleD">USER</option>
+                                    <option value="ADMIN">ADMIN</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger text-light">
+                        <a class="text-light text-decoration-none" id="delete">Delete</a>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+       ></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+<script src="../static/js/new.js"></script>
+</body>
+</html>
